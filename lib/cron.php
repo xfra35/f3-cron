@@ -22,7 +22,7 @@ class Cron extends \Prefab {
     protected $jobs=array();
 
     /** @var bool */
-    protected $parallelizable=FALSE;
+    protected $async=FALSE;
 
     /** @var array */
     protected $presets=array(
@@ -47,11 +47,11 @@ class Cron extends \Prefab {
     }
 
     /**
-     * Execute a job, optionally spawning a new process
+     * Execute a job
      * @param string $job
-     * @param bool $spawn
+     * @param bool $async
      */
-    function execute($job,$spawn=TRUE) {
+    function execute($job,$async=TRUE) {
         if (!isset($this->jobs[$job]))
             return;
         $f3=\Base::instance();
@@ -59,7 +59,7 @@ class Cron extends \Prefab {
             $func=$f3->grab($func);
         if (!is_callable($func))
             return;
-        if ($spawn && $this->parallelizable) {
+        if ($async && $this->async) {
             // PHP docs: If a program is started with this function, in order for it to continue running in the background,
             // the output of the program must be redirected to a file or another output stream.
             // Failing to do so will cause PHP to hang until the execution of the program ends.
@@ -77,14 +77,14 @@ class Cron extends \Prefab {
     /**
      * Run scheduler, i.e executes all due jobs at a given time
      * @param int $time
-     * @param bool $parallel
+     * @param bool $async
      */
-    function run($time=NULL,$parallel=TRUE) {
+    function run($time=NULL,$async=TRUE) {
         if (!isset($time))
             $time=time();
         foreach(array_keys($this->jobs) as $job)
             if ($this->isDue($job,$time))
-                $this->execute($job,$parallel);
+                $this->execute($job,$async);
     }
 
     /**
@@ -167,7 +167,7 @@ class Cron extends \Prefab {
 
     //! Read-only public properties
     function __get($name) {
-        if (in_array($name,array('jobs','parallelizable','presets')))
+        if (in_array($name,array('jobs','async','presets')))
             return $this->$name;
         trigger_error(sprintf(self::E_Undefined,__CLASS__,$name));
     }
@@ -188,7 +188,7 @@ class Cron extends \Prefab {
             foreach($config['presets'] as $name=>$expr)
                 $this->presets[$name]=is_array($expr)?implode(',',$expr):$expr;
         if (function_exists('exec') && exec('php -r "echo 1+3;"')=='4')
-            $this->parallelizable=TRUE;
+            $this->async=TRUE;
         if ($this->cli || $this->web)
             $f3->route(array('GET /cron','GET /cron/@job'),array($this,'route'));
     }

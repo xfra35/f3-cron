@@ -25,11 +25,11 @@ class Tests {
             isset($f3->ROUTES['/cron']),
             'Route automatically defined'
         );
-        //parallelism
-        $parallelizable=function_exists('exec') && exec('php -r "echo 1+3;"')=='4';
+        //async auto-detection
+        $async=function_exists('exec') && exec('php -r "echo 1+3;"')=='4';
         $test->expect(
-            $cron->parallelizable===$parallelizable,
-            'Parallelization auto-detection: '.($parallelizable?'ON':'OFF')
+            $cron->async===$async,
+            'Async auto-detection: '.($async?'ON':'OFF')
         );
         //expression parsing
         $test->expect(
@@ -112,26 +112,26 @@ class Tests {
             $f3->job='AB',
             'Run scheduler, i.e executes all due jobs'
         );
-        //parallel execution
-        if ($parallelizable) {
+        //async job execution
+        if ($async) {
             $cron->set('test1','Jobs->test1','* * * * *');
             $cron->set('test2','Jobs->test2','* * * * *');
             @unlink($testfile=$f3->TEMP.'cron-test.txt');
             $cron->execute('test1',TRUE);
             $cron->execute('test2',TRUE);
-            $parallel_ok=FALSE;
-            //wait for parallel processes to complete
+            $async_ok=FALSE;
+            //wait for async processes to complete
             $start=microtime(TRUE);
             $loop=array(0.1,4);//loop (step=0.1s / max=4s)
             while(microtime(TRUE)-$start<$loop[1]) {
                 usleep($loop[0]*1000000);
                 if (file_exists($testfile) && preg_match('/([ABCD]){4}/',file_get_contents($testfile),$m) && array_unique($m)===$m) {
-                    $parallel_ok=TRUE;
+                    $async_ok=TRUE;
                     break;
                 }
             }
             $test->expect(
-                $parallel_ok,
+                $async_ok,
                 'Parallel job execution'
             );
         }
