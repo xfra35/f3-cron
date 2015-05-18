@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="{{ @ENCODING}}" />
+    <title>{{ @VERSION }}: {{ @active }}</title>
+    <link rel="stylesheet" type="text/css" href="tests/tests.css" />
+</head>
+<body>
+<div class="row">
+    <div class="sidebar">
+    </div>
+    <div class="main">
+        <h1>{{ @active }}</h1>
+        {~ foreach (@results as @i=>@result): ~}
+        <p>
+            <span class="status {{ @result.status?'pass':'fail' }}">{{ @i+1 }}</span>
+            <span class="text">{{ @result.text }} {~ if (!@result.status && @result.source) echo '('.@result.source.')' ~}</span><br/>
+        </p>
+        {~ endforeach ~}
+    </div>
+</div>
+</body>
+</html>
