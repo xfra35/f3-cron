@@ -47,6 +47,15 @@ class Cron extends \Prefab {
     }
 
     /**
+     * Define a preset
+     * @param string $name
+     * @param string $expr
+     */
+    function preset($name,$expr) {
+        $this->presets[$name]=$expr;
+    }
+
+    /**
      * Execute a job
      * @param string $job
      * @param bool $async
@@ -186,7 +195,7 @@ class Cron extends \Prefab {
             }
         if (isset($config['presets']))
             foreach($config['presets'] as $name=>$expr)
-                $this->presets[$name]=is_array($expr)?implode(',',$expr):$expr;
+                $this->preset($name,is_array($expr)?implode(',',$expr):$expr);
         if (function_exists('exec') && exec('php -r "echo 1+3;"')=='4')
             $this->async=TRUE;
         if ($this->cli || $this->web)
