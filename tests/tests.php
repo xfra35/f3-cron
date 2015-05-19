@@ -53,7 +53,7 @@ class Tests {
             $cron->parseExpr('@hourly')===$cron->parseExpr('0 * * * *') &&
             $cron->parseExpr('@weekend')===$cron->parseExpr('0 8 * * 6') &&
             $cron->parseExpr('@lunch')===$cron->parseExpr('0 12 * * *'),
-            'parseExpr(): predefined expressions'
+            'parseExpr(): schedule presets'
         );
         $test->expect(
             $cron->parseExpr('1 2 3 4')===FALSE && $cron->parseExpr('*-2 2 3 4 5')===FALSE &&

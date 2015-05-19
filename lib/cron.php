@@ -35,7 +35,7 @@ class Cron extends \Prefab {
     );
 
     /**
-     * Define a job
+     * Schedule a job
      * @param string $job
      * @param string $handler
      * @param string $expr
@@ -47,12 +47,27 @@ class Cron extends \Prefab {
     }
 
     /**
-     * Define a preset
+     * Define a schedule preset
      * @param string $name
      * @param string $expr
      */
     function preset($name,$expr) {
         $this->presets[$name]=$expr;
+    }
+
+    /**
+     * Returns TRUE if the requested job is due at the given time
+     * @param string $job
+     * @param int $time
+     * @return bool
+     */
+    function isDue($job,$time) {
+        if (!isset($this->jobs[$job]) || !$parts=$this->parseExpr($this->jobs[$job][1]))
+            return FALSE;
+        foreach($this->parseTimestamp($time) as $i=>$k)
+            if (!in_array($k,$parts[$i]))
+                return FALSE;
+        return TRUE;
     }
 
     /**
@@ -108,21 +123,6 @@ class Cron extends \Prefab {
             $this->execute($params['job'],FALSE);
         else
             $this->run();
-    }
-
-    /**
-     * Returns TRUE if the requested job is due at the given time
-     * @param string $job
-     * @param int $time
-     * @return bool
-     */
-    function isDue($job,$time) {
-        if (!isset($this->jobs[$job]) || !$parts=$this->parseExpr($this->jobs[$job][1]))
-            return FALSE;
-        foreach($this->parseTimestamp($time) as $i=>$k)
-            if (!in_array($k,$parts[$i]))
-                return FALSE;
-        return TRUE;
     }
 
     /**
