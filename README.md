@@ -31,15 +31,17 @@ By default, this interface is accessible in CLI mode only and is meant to be cal
 
 ### Step 1:
 
-Configure your server job scheduler so that it calls `/cron` every minute. Here's how to do it on a \*nix server:
+Configure your server job scheduler so that it calls `php index.php /cron` every minute.
 
-Assuming that your application resides in /path/to/app/index.php, create a file, named for example *mycrontab*, containing the following line:
+Here's how to do it on a \*nix server, assuming that your application resides in `/path/to/app/index.php`:
+
+* create a file, named for example *mycrontab*, containing the following line:
 
 ```cron
 * * * * * cd /path/to/app; php index.php /cron
 ```
 
-and configure cron with it, using the following command:
+* configure cron with it, using the following command:
 
 ```bash
 crontab mycrontab
@@ -255,7 +257,8 @@ $cron->execute('Job2',FALSE); // executes Job2 synchronously
 **Run scheduler, i.e executes all due jobs at a given time**
 
 ```php
-$cron->run(strtotime('yesterday midnight')); // run asynchronously all jobs due yesterday at midnight
+$cron->run(strtotime('yesterday midnight'));
+// run asynchronously all jobs due yesterday at midnight
 ```
 
 ## Potential improvements
