@@ -11,6 +11,7 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
 * [Options](#options)
     * [Logging](#logging)
     * [CLI/Web interface](#cliweb-interface)
+    * [CLI path](#cli-path)
 * [Ini configuration](#ini-configuration)
 * [Asynchronicity](#asynchronicity)
 * [API](#api)
@@ -136,12 +137,28 @@ If you set `$cron->log=TRUE`, every successfully executed job will be logged in 
 
 ### CLI/Web interface
 
-By the default, the URIs `/cron` and `cron/@job` are available in CLI mode only. That means an HTTP request to them will throw a 404 error.
+By default, the URIs `/cron` and `cron/@job` are available in CLI mode only. That means an HTTP request to them will throw a 404 error.
 
 You can control that behavior with the 2 following public properties:
 
 * `$cron->cli` (TRUE)
 * `$cron->web` (FALSE)
+
+### CLI path
+
+By default, the script called asynchronously in CLI mode is index.php located in the current working directory.
+
+You may need to tweak this value if:
+
+* your web root differs from your app root (e.g: `index.php` resides in `www/` and starts with `chdir('..')`)
+* you want to handle all the scheduling in a separate file (e.g: `cron.php` instead of `index.php`)
+
+Examples:
+
+```php
+$cron->clipath='htdocs/index.php';//relative to app root
+$cron->clipath=__DIR__.'/cron.php';//absolute path
+```
 
 ## Ini configuration
 
@@ -152,6 +169,7 @@ Configuration is possible from within an .ini file, using the `CRON` variable. E
 log = TRUE
 cli = TRUE
 web = FALSE
+clipath = cron.php
 
 [CRON.presets]
 lunch = 0 12 * * *
@@ -211,6 +229,17 @@ $cron->cli=FALSE;// disable CLI interface
 
 ```php
 $cron->web=TRUE;// enable web interface
+```
+
+### clipath
+
+**Path of the script to call asynchronously in CLI mode**
+
+Defaults to index.php in the current working directory.
+
+```php
+$cron->clipath='htdocs/index.php';//relative to app root
+$cron->clipath=__DIR__.'/cron.php';//absolute path
 ```
 
 ### set( $job, $handler, $expr )
