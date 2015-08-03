@@ -22,13 +22,13 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
 This plugin provides your app with an external interface to run scheduled jobs.
 The interface consists in 2 routes automatically added to your app:
 
-* `/cron` checks for due jobs and executes them
-* `/cron/@job` triggers a specific job
+* `GET /cron` checks for due jobs and executes them
+* `GET /cron/@job` triggers a specific job
 
 By default, this interface is accessible in CLI mode only and is meant to be called by the server job scheduler:
 
-1. Unix cron or Windows Task Scheduler calls `index.php /cron` every minute (or at a lower rate)
-2. `index.php /cron` checks for due jobs at that time and executes them, asynchronously if possible
+1. Unix cron or Windows Task Scheduler calls `index.php /cron` every minute (or at a slower rate).
+2. `index.php /cron` checks for due jobs at that time and executes them, asynchronously if possible.
 
 ### Step 1:
 
@@ -36,7 +36,7 @@ Configure your server job scheduler so that it calls `php index.php /cron` every
 
 Here's how to do it on a \*nix server, assuming that your application resides in `/path/to/app/index.php`:
 
-* create a file, named for example *mycrontab*, containing the following line:
+* create a file named, for example, *mycrontab*, containing the following line:
 
 ```cron
 * * * * * cd /path/to/app; php index.php /cron
@@ -75,7 +75,7 @@ $f3->run();
 ### Crontab
 
 Each job is scheduled using the (nearly) standard crontab format,
-which consists in 5 fields separated by spaces:
+which consists of 5 fields separated by spaces:
 
 ```
  * * * * *
@@ -137,12 +137,12 @@ If you set `$cron->log=TRUE`, every successfully executed job will be logged in 
 
 ### CLI/Web interface
 
-By default, the URIs `/cron` and `cron/@job` are available in CLI mode only. That means an HTTP request to them will throw a 404 error.
+By default, the routes `GET /cron` and `GET cron/@job` are available in CLI mode only, which means that an HTTP request to them will throw a 404 error.
 
 You can control that behavior with the 2 following public properties:
 
-* `$cron->cli` (TRUE)
-* `$cron->web` (FALSE)
+* `$cron->cli` determines if the routes are available in CLI mode (default: `TRUE`)
+* `$cron->web` determines if the routes are available in Web mode (default: `FALSE`)
 
 ### CLI path
 
@@ -252,7 +252,7 @@ $cron->set('Job2','App->job2','*/5 * * * *'); // runs every 5 minutes
 $cron->set('Job3','App->job3','0 8 * * 1'); // runs every Monday at 08:00
 ```
 
-**NB:** Valid characters for a job name are alphanumeric characters and hyphens.
+**NB:** Valid characters for job names are alphanumeric characters and hyphens.
 
 ### preset( $name, $expr )
 
@@ -263,7 +263,7 @@ $cron->preset('weekend','0 8 * * 6'); // runs every Saturday at 08:00
 $cron->preset('lunch','0 12 * * *'); // runs every day at 12:00
 ```
 
-**NB:** Valid characters for a job name are alphanumeric characters.
+**NB:** Valid characters for job names are alphanumeric characters.
 
 ### isDue( $job, $time )
 
