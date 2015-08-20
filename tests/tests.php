@@ -77,7 +77,9 @@ class Tests {
             $cron->isDue('Foo',$time)===FALSE || $cron->isDue('joba',$time)===FALSE,
             'isDue() returns FALSE if the requested job doesn\'t exist or if the case doesn\'t match'
         );
-        $cron->set('JobD',function()use($f3){$f3->job.='D';},'* * 4 * *');
+        $cron->set('JobD',function($f3){
+            $f3->job.='D';
+        },'* * 4 * *');
         $cron->set('JobE','Jobs->jobE','2 1 5 4 1');
         $cron->set('JobF','Jobs->jobF','*/3 * * * *');
         $test->expect(
