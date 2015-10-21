@@ -1,0 +1,12 @@
+{
+    "name": "xfra35/f3-cron",
+    "description": "Job scheduling for the PHP Fat-Free Framework",
+    "homepage": "https://github.com/xfra35/f3-cron",
+    "license": "GPL-3.0",
+    "autoload": {
+		"classmap": ["lib/"]
+    },
+	"require": {
+		  "bcosca/fatfree-core": "master"
+	}
+}
