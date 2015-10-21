@@ -7,6 +7,6 @@
 		"classmap": ["lib/"]
     },
 	"require": {
-		  "mmneimn/fatfree-core": "master",
+		  "mmneimn/fatfree-core": "master"
 	}
 }
