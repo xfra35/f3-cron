@@ -7,6 +7,6 @@
 		"classmap": ["lib/"]
     },
 	"require": {
-		  "mmneimn/fatfree-core": "master"
+		  "bcosca/fatfree-core": "master"
 	}
 }
