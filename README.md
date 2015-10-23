@@ -3,6 +3,7 @@
 
 This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you control job scheduling directly from your web app.
 
+* [Installation](#installation)
 * [Operation and basic usage](#operation-and-basic-usage)
 * [Schedule format](#schedule-format)
     * [Crontab](#crontab)
@@ -16,6 +17,10 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
 * [Asynchronicity](#asynchronicity)
 * [API](#api)
 * [Potential improvements](#potential-improvements)
+
+## Installation
+
+To install this plugin, just copy the `lib/cron.php` file into your `lib/` or your `AUTOLOAD` folder.
 
 ## Operation and basic usage
 
