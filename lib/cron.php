@@ -202,8 +202,10 @@ class Cron extends \Prefab {
         if (isset($config['presets']))
             foreach($config['presets'] as $name=>$expr)
                 $this->preset($name,is_array($expr)?implode(',',$expr):$expr);
-        if (function_exists('exec') && exec('php -r "echo 1+3;"')=='4')
-            $this->async=TRUE;
+        if (function_exists('exec')) {
+            exec('php -v 2>&1',$out,$ret);
+            $this->async=$ret==0;// check if the `php` binary is in the path and can be executed
+        }
         $f3->route(array('GET /cron','GET /cron/@job'),array($this,'route'));
     }
 
