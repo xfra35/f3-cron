@@ -13,9 +13,6 @@ class Cron extends \Prefab {
     public $log=FALSE;
 
     /** @var bool */
-    public $cli=TRUE;
-
-    /** @var bool */
     public $web=FALSE;
 
     /** @var string */
@@ -128,7 +125,7 @@ class Cron extends \Prefab {
      * @param array $params
      */
     function route($f3,$params) {
-        if (PHP_SAPI=='cli'?!$this->cli:!$this->web)
+        if (PHP_SAPI!='cli' && !$this->web)
             $f3->error(404);
         if (isset($params['job']))
             $this->execute($params['job'],FALSE);
@@ -196,7 +193,7 @@ class Cron extends \Prefab {
     function __construct() {
         $f3=\Base::instance();
         $config=(array)$f3->get('CRON');
-        foreach(array('log','cli','web') as $k)
+        foreach(array('log','web') as $k)
             if (isset($config[$k]))
                 $this->$k=(bool)$config[$k];
         foreach(array('clipath') as $k)
@@ -212,8 +209,7 @@ class Cron extends \Prefab {
                 $this->preset($name,is_array($expr)?implode(',',$expr):$expr);
         if (function_exists('exec') && exec('php -r "echo 1+3;"')=='4')
             $this->async=TRUE;
-        if ($this->cli || $this->web)
-            $f3->route(array('GET /cron','GET /cron/@job'),array($this,'route'));
+        $f3->route(array('GET /cron','GET /cron/@job'),array($this,'route'));
     }
 
 }

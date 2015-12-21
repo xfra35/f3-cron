@@ -15,7 +15,7 @@ class Tests {
         ),'CRON.');
         $cron=Cron::instance();
         $test->expect(
-            !$cron->log && $cron->cli && !$cron->web && count($cron->jobs)==3 && $cron->clipath=='index.php',
+            !$cron->log && !$cron->web && count($cron->jobs)==3 && $cron->clipath=='index.php',
             'Initial config'
         );
         $test->expect(

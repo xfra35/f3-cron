@@ -11,7 +11,7 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
     * [Presets](#presets)
 * [Options](#options)
     * [Logging](#logging)
-    * [CLI/Web interface](#cliweb-interface)
+    * [Web interface](#web-interface)
     * [CLI path](#cli-path)
 * [Ini configuration](#ini-configuration)
 * [Asynchronicity](#asynchronicity)
@@ -140,18 +140,15 @@ The following presets are defined by default:
 
 If you set `$cron->log=TRUE`, every successfully executed job will be logged in a `cron.log` file located in the `TEMP` folder.
 
-### CLI/Web interface
+### Web interface
 
 By default, the routes `GET /cron` and `GET cron/@job` are available in CLI mode only, which means that an HTTP request to them will throw a 404 error.
 
-You can control that behavior with the 2 following public properties:
-
-* `$cron->cli` determines if the routes are available in CLI mode (default: `TRUE`)
-* `$cron->web` determines if the routes are available in Web mode (default: `FALSE`)
+You can enable web routes by setting `$cron->web=TRUE`.
 
 ### CLI path
 
-By default, the script called asynchronously in CLI mode is index.php located in the current working directory.
+By default, the script called asynchronously in CLI mode is `index.php` located in the current working directory.
 
 You may need to tweak this value if:
 
@@ -172,7 +169,6 @@ Configuration is possible from within an .ini file, using the `CRON` variable. E
 ```ini
 [CRON]
 log = TRUE
-cli = TRUE
 web = FALSE
 clipath = cron.php
 
@@ -218,14 +214,6 @@ $cron = Cron::instance();
 
 ```php
 $cron->log=TRUE;// enable logging
-```
-
-### cli
-
-**CLI interface (default=TRUE)**
-
-```php
-$cron->cli=FALSE;// disable CLI interface
 ```
 
 ### web
