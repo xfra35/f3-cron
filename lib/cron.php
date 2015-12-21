@@ -16,7 +16,7 @@ class Cron extends \Prefab {
     public $web=FALSE;
 
     /** @var string */
-    public $clipath;
+    public $clipath='index.php';
 
     /** @var array */
     protected $jobs=array();
@@ -87,12 +87,8 @@ class Cron extends \Prefab {
             // PHP docs: If a program is started with this function, in order for it to continue running in the background,
             // the output of the program must be redirected to a file or another output stream.
             // Failing to do so will cause PHP to hang until the execution of the program ends.
-            $dir='';
-            $file='index.php';
-            if ($this->clipath) {
-                $dir=dirname($this->clipath);
-                $file=basename($this->clipath);
-            }
+            $dir=dirname($this->clipath);
+            $file=basename($this->clipath);
             if (@$dir[0]!='/')
                 $dir=getcwd().'/'.$dir;
             exec(sprintf('cd "%s";php %s /cron/%s > /dev/null 2>/dev/null &',$dir,$file,$job));
@@ -193,12 +189,11 @@ class Cron extends \Prefab {
     function __construct() {
         $f3=\Base::instance();
         $config=(array)$f3->get('CRON');
-        foreach(array('log','web') as $k)
-            if (isset($config[$k]))
-                $this->$k=(bool)$config[$k];
-        foreach(array('clipath') as $k)
-            if (isset($config[$k]))
-                $this->$k=(string)$config[$k];
+        foreach(array('log','web','clipath') as $k)
+            if (isset($config[$k])) {
+                settype($config[$k],gettype($this->$k));
+                $this->$k=$config[$k];
+            }
         if (isset($config['jobs']))
             foreach($config['jobs'] as $job=>$arr) {
                 $handler=array_shift($arr);

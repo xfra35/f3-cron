@@ -148,12 +148,12 @@ You can enable web routes by setting `$cron->web=TRUE`.
 
 ### CLI path
 
-By default, the script called asynchronously in CLI mode is `index.php` located in the current working directory.
+By default, the script called asynchronously is `index.php` located in the current working directory.
 
 You may need to tweak this value if:
 
 * your web root differs from your app root (e.g: `index.php` resides in `www/` and starts with `chdir('..')`)
-* you want to handle all the scheduling in a separate file (e.g: `cron.php` instead of `index.php`)
+* all your scheduling is handled in a separate file (e.g: `cron.php` instead of `index.php`)
 
 Examples:
 
@@ -226,9 +226,9 @@ $cron->web=TRUE;// enable web interface
 
 ### clipath
 
-**Path of the script to call asynchronously in CLI mode**
+**Path of the script to call asynchronously (default='index.php')**
 
-Defaults to index.php in the current working directory.
+Defaults to `index.php` in the current working directory.
 
 ```php
 $cron->clipath='htdocs/index.php';//relative to app root
