@@ -6,6 +6,12 @@ class Cron extends \Prefab {
     const
         E_Undefined='Undefined property: %s::$%s',
         E_Invalid='"%s" is not a valid name: it should only contain alphanumeric characters',
+        E_NotFound='Job %s doesn\' exist',
+        E_Callable='Job %s cannot be called';
+    //@}
+
+    //@{ Log message
+    const
         L_Execution='%s (%.3F s)';
     //@}
 
@@ -17,6 +23,9 @@ class Cron extends \Prefab {
 
     /** @var string */
     public $clipath='index.php';
+
+    /** @var bool */
+    public $silent=TRUE;
 
     /** @var array */
     protected $jobs=array();
@@ -74,15 +83,16 @@ class Cron extends \Prefab {
      * Execute a job
      * @param string $job
      * @param bool $async
+     * @return bool TRUE = job has been executed / FALSE = job has been delegated to a background process
      */
     function execute($job,$async=TRUE) {
         if (!isset($this->jobs[$job]))
-            return;
+            user_error(sprintf(self::E_NotFound,$job),E_USER_ERROR);
         $f3=\Base::instance();
         if (is_string($func=$this->jobs[$job][0]))
             $func=$f3->grab($func);
         if (!is_callable($func))
-            return;
+            user_error(sprintf(self::E_Callable,$job),E_USER_ERROR);
         if ($async && $this->async) {
             // PHP docs: If a program is started with this function, in order for it to continue running in the background,
             // the output of the program must be redirected to a file or another output stream.
@@ -92,27 +102,31 @@ class Cron extends \Prefab {
             if (@$dir[0]!='/')
                 $dir=getcwd().'/'.$dir;
             exec(sprintf('cd "%s";php %s /cron/%s > /dev/null 2>/dev/null &',$dir,$file,$job));
-        } else {
-            $start=microtime(TRUE);
-            call_user_func_array($func,array($f3));
-            if ($this->log) {
-                $log=new Log('cron.log');
-                $log->write(sprintf(self::L_Execution,$job,microtime(TRUE)-$start));
-            }
+            return FALSE;
         }
+        $start=microtime(TRUE);
+        call_user_func_array($func,array($f3));
+        if ($this->log) {
+            $log=new Log('cron.log');
+            $log->write(sprintf(self::L_Execution,$job,microtime(TRUE)-$start));
+        }
+        return TRUE;
     }
 
     /**
      * Run scheduler, i.e executes all due jobs at a given time
      * @param int $time
      * @param bool $async
+     * @return array List of executed jobs
      */
     function run($time=NULL,$async=TRUE) {
         if (!isset($time))
             $time=time();
+        $exec=array();
         foreach(array_keys($this->jobs) as $job)
             if ($this->isDue($job,$time))
-                $this->execute($job,$async);
+                $exec[$job]=$this->execute($job,$async);
+        return $exec;
     }
 
     /**
@@ -123,10 +137,17 @@ class Cron extends \Prefab {
     function route($f3,$params) {
         if (PHP_SAPI!='cli' && !$this->web)
             $f3->error(404);
-        if (isset($params['job']))
-            $this->execute($params['job'],FALSE);
-        else
+        $exec=isset($params['job'])?
+            array($params['job']=>$this->execute($params['job'],FALSE)):
             $this->run();
+        if (!$this->silent) {
+            if (PHP_SAPI!='cli')
+                header('Content-Type: text/plain');
+            if (!$exec)
+                die('Nothing to do');
+            foreach($exec as $job=>$ok)
+                echo sprintf('%s [%s]',$job,$ok?'OK':'async')."\r\n";
+        }
     }
 
     /**
@@ -189,7 +210,7 @@ class Cron extends \Prefab {
     function __construct() {
         $f3=\Base::instance();
         $config=(array)$f3->get('CRON');
-        foreach(array('log','web','clipath') as $k)
+        foreach(array('log','web','clipath','silent') as $k)
             if (isset($config[$k])) {
                 settype($config[$k],gettype($this->$k));
                 $this->$k=$config[$k];

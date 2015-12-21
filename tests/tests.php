@@ -94,11 +94,6 @@ class Tests {
             $f3->job==='AD',
             'Serial job execution'
         );
-        $cron->execute('JobC',FALSE);
-        $test->expect(
-            TRUE,
-            'Silently fail on a non-existing job handler'
-        );
         //logging
         @unlink($logfile=$f3->LOGS.'cron.log');
         $cron->log=TRUE;

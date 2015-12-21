@@ -10,6 +10,10 @@ class Jobs {
         $f3->concat('job','B');
     }
 
+    function jobC($f3) {
+        $f3->concat('job','C');
+    }
+
     function test1($f3) {
         $this->write('A');
         usleep(50000);

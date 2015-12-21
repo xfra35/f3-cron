@@ -235,6 +235,16 @@ $cron->clipath='htdocs/index.php';//relative to app root
 $cron->clipath=__DIR__.'/cron.php';//absolute path
 ```
 
+### silent
+
+**Silent mode (default=TRUE)**
+
+Disable silent mode if you want the script to output the list of executed jobs.
+
+```php
+$cron->silent=FALSE;
+```
+
 ### set( $job, $handler, $expr )
 
 **Schedule a job**
