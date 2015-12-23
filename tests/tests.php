@@ -11,11 +11,11 @@ class Tests {
             'log'=>FALSE,
             'cli'=>TRUE,
             'web'=>FALSE,
-            'clipath'=>'index.php',
+            'script'=>'index.php',
         ),'CRON.');
         $cron=Cron::instance();
         $test->expect(
-            !$cron->log && !$cron->web && count($cron->jobs)==3 && $cron->clipath=='index.php',
+            !$cron->log && !$cron->web && count($cron->jobs)==3 && $cron->script=='index.php',
             'Initial config'
         );
         $test->expect(
@@ -26,11 +26,24 @@ class Tests {
             isset($f3->ROUTES['/cron']),
             'Route automatically defined'
         );
-        //async auto-detection
-        $async=function_exists('exec') && exec('php -r "echo 1+3;"')=='4';
+        //binary auto-detection
+        $binary=NULL;
+        if (function_exists('exec'))
+            foreach(array('php','php-cli') as $bin) {
+                exec($bin.' -v 2>&1',$out,$ret);
+                if ($ret==0) {
+                    $binary=$bin;
+                    break;
+                }
+            }
         $test->expect(
-            $cron->async===$async,
-            'Async auto-detection: '.($async?'ON':'OFF')
+            $cron->binary===$binary,
+            'Binary auto-detection: '.($binary?:'none')
+        );
+        $cron->binary('foobarbaz');
+        $test->expect(
+            $cron->binary===$binary,
+            'Binary existence check'
         );
         //expression parsing
         $test->expect(
@@ -111,7 +124,7 @@ class Tests {
             'Run scheduler, i.e executes all due jobs'
         );
         //async job execution
-        if ($async) {
+        if ($binary) {
             $cron->set('test1','Jobs->test1','* * * * *');
             $cron->set('test2','Jobs->test2','* * * * *');
             @unlink($testfile=$f3->TEMP.'cron-test.txt');

@@ -12,7 +12,8 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
 * [Options](#options)
     * [Logging](#logging)
     * [Web interface](#web-interface)
-    * [CLI path](#cli-path)
+    * [Script path](#script-path)
+    * [PHP binary path](#php-binary-path)
 * [Ini configuration](#ini-configuration)
 * [Asynchronicity](#asynchronicity)
 * [API](#api)
@@ -146,7 +147,13 @@ By default, the routes `GET /cron` and `GET cron/@job` are available in CLI mode
 
 You can enable web routes by setting `$cron->web=TRUE`.
 
-### CLI path
+In that case, `/cron` can be triggered via HTTP on a periodic basis, for example by your web app, or by a web cron service, or even by your own crontab:
+
+```cron
+* * * * * curl http://mydomain.tld/cron
+```
+
+### Script path
 
 By default, the script called asynchronously is `index.php` located in the current working directory.
 
@@ -158,8 +165,21 @@ You may need to tweak this value if:
 Examples:
 
 ```php
-$cron->clipath='htdocs/index.php';//relative to app root
-$cron->clipath=__DIR__.'/cron.php';//absolute path
+$cron->script='htdocs/index.php';//relative to app root
+$cron->script=__DIR__.'/cron.php';//absolute path
+```
+
+### PHP binary path
+
+By default, the PHP binary used to trigger asynchronous job executions is either `php` or `php-cli` (smart guess).
+
+You may need to tweak this value if none of these values correspond to an executable PHP CLI binary
+or if they are not in the path.
+
+Example:
+
+```php
+$cron->binary('/home/myphp-cli');
 ```
 
 ## Ini configuration
@@ -170,7 +190,7 @@ Configuration is possible from within an .ini file, using the `CRON` variable. E
 [CRON]
 log = TRUE
 web = FALSE
-clipath = cron.php
+script = cron.php
 
 [CRON.presets]
 lunch = 0 12 * * *
@@ -195,8 +215,9 @@ $f3->run();
 
 If you want tasks to be run asynchronously, you'll need:
 * `exec()` to be enabled on your hosting
-* the `php` executable to be executable and in the path of your hosting user
-  
+* the [script path](#script-path) to be configured correctly
+* the [PHP CLI binary](#php-binary-path) to be executable and in the path of your hosting user
+
 **NB1:** The plugin will detect automatically if jobs can be run asynchronously.
 If not, jobs will be executed synchronously, which may take longer and add a risk of queue loss in case of a job failure.
 
@@ -224,15 +245,35 @@ $cron->log=TRUE;// enable logging
 $cron->web=TRUE;// enable web interface
 ```
 
-### clipath
+### script
 
 **Path of the script to call asynchronously (default='index.php')**
 
 Defaults to `index.php` in the current working directory.
 
 ```php
-$cron->clipath='htdocs/index.php';//relative to app root
-$cron->clipath=__DIR__.'/cron.php';//absolute path
+$cron->script='htdocs/index.php';//relative to app root
+$cron->script=__DIR__.'/cron.php';//absolute path
+```
+
+### clipath
+
+**Alias for script [deprecated]**
+
+### binary
+
+**Path of the PHP CLI binary (default='php' or 'php-cli')**
+
+```php
+echo $cron->binary;// php
+```
+
+### binary( $path )
+
+**Set PHP CLI binary path**
+
+```php
+$cron->binary('/home/myphp-cli');
 ```
 
 ### silent

@@ -14,6 +14,18 @@ class Jobs {
         $f3->concat('job','C');
     }
 
+    function jobD($f3) {
+        $f3->concat('job','D');
+    }
+
+    function jobE($f3) {
+        $f3->concat('job','E');
+    }
+
+    function jobF($f3) {
+        $f3->concat('job','F');
+    }
+
     function test1($f3) {
         $this->write('A');
         usleep(50000);

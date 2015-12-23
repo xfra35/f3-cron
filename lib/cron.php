@@ -21,17 +21,17 @@ class Cron extends \Prefab {
     /** @var bool */
     public $web=FALSE;
 
-    /** @var string */
-    public $clipath='index.php';
-
     /** @var bool */
     public $silent=TRUE;
 
+    /** @var string Script path */
+    public $script='index.php';
+
+    /** @var string PHP CLI path */
+    protected $binary;
+
     /** @var array */
     protected $jobs=array();
-
-    /** @var bool */
-    protected $async=FALSE;
 
     /** @var array */
     protected $presets=array(
@@ -42,6 +42,20 @@ class Cron extends \Prefab {
         'daily'=>'0 0 * * *',
         'hourly'=>'0 * * * *',
     );
+
+    /**
+     * Set binary path after checking that it can be executed and is CLI
+     * @param string $path
+     * @return string
+     */
+    function binary($path) {
+        if (function_exists('exec')) {
+            exec($path.' -v 2>&1',$out,$ret);
+            if ($ret==0 && preg_match('/cli/',@$out[0],$out))
+                $this->binary=$path;
+        }
+        return $this->binary;
+    }
 
     /**
      * Schedule a job
@@ -93,15 +107,15 @@ class Cron extends \Prefab {
             $func=$f3->grab($func);
         if (!is_callable($func))
             user_error(sprintf(self::E_Callable,$job),E_USER_ERROR);
-        if ($async && $this->async) {
+        if ($async && isset($this->binary)) {
             // PHP docs: If a program is started with this function, in order for it to continue running in the background,
             // the output of the program must be redirected to a file or another output stream.
             // Failing to do so will cause PHP to hang until the execution of the program ends.
-            $dir=dirname($this->clipath);
-            $file=basename($this->clipath);
+            $dir=dirname($this->script);
+            $file=basename($this->script);
             if (@$dir[0]!='/')
                 $dir=getcwd().'/'.$dir;
-            exec(sprintf('cd "%s";php %s /cron/%s > /dev/null 2>/dev/null &',$dir,$file,$job));
+            exec(sprintf('cd "%s";%s %s /cron/%s > /dev/null 2>/dev/null &',$dir,$this->binary,$file,$job));
             return FALSE;
         }
         $start=microtime(TRUE);
@@ -201,8 +215,10 @@ class Cron extends \Prefab {
 
     //! Read-only public properties
     function __get($name) {
-        if (in_array($name,array('jobs','async','presets')))
+        if (in_array($name,array('binary','jobs','presets')))
             return $this->$name;
+        if ($name=='clipath') // alias for script [deprecated]
+            return $this->script;
         trigger_error(sprintf(self::E_Undefined,__CLASS__,$name));
     }
 
@@ -210,11 +226,13 @@ class Cron extends \Prefab {
     function __construct() {
         $f3=\Base::instance();
         $config=(array)$f3->get('CRON');
-        foreach(array('log','web','clipath','silent') as $k)
+        foreach(array('log','web','script','silent') as $k)
             if (isset($config[$k])) {
                 settype($config[$k],gettype($this->$k));
                 $this->$k=$config[$k];
             }
+        if (isset($config['binary']))
+            $this->binary($config['binary']);
         if (isset($config['jobs']))
             foreach($config['jobs'] as $job=>$arr) {
                 $handler=array_shift($arr);
@@ -223,10 +241,10 @@ class Cron extends \Prefab {
         if (isset($config['presets']))
             foreach($config['presets'] as $name=>$expr)
                 $this->preset($name,is_array($expr)?implode(',',$expr):$expr);
-        if (function_exists('exec')) {
-            exec('php -v 2>&1',$out,$ret);
-            $this->async=$ret==0;// check if the `php` binary is in the path and can be executed
-        }
+        if (!isset($this->binary))
+            foreach(array('php','php-cli') as $path) // try to guess the binary name
+                if ($this->binary($path))
+                    break;
         $f3->route(array('GET /cron','GET /cron/@job'),array($this,'route'));
     }
 
