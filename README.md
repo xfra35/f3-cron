@@ -139,7 +139,7 @@ The following presets are defined by default:
 
 ### Logging
 
-If you set `$cron->log=TRUE`, every successfully executed job will be logged in a `cron.log` file located in the `TEMP` folder.
+If you set `$cron->log=TRUE`, every successfully executed job will be logged in a `cron.log` file located in the [LOGS](http://fatfreeframework.com/quick-reference#LOGS) folder.
 
 ### Web interface
 
