@@ -16,6 +16,7 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
     * [PHP binary path](#php-binary-path)
 * [Ini configuration](#ini-configuration)
 * [Asynchronicity](#asynchronicity)
+* [UNIX user permissions](#unix-user-permissions)
 * [API](#api)
 * [Potential improvements](#potential-improvements)
 
@@ -54,7 +55,9 @@ Here's how to do it on a \*nix server, assuming that your application resides in
 crontab mycrontab
 ```
 
-**NB:** depending on your hosting, you may need to ask your provider to perform that step.
+**NB1:** depending on your hosting, you may need to ask your provider to perform that step.
+
+**NB2:** if your cron job needs disk write access, take care about the [UNIX user permissions](#unix-user-permissions).
 
 ### Step 2:
 
@@ -222,6 +225,23 @@ If you want tasks to be run asynchronously, you'll need:
 If not, jobs will be executed synchronously, which may take longer and add a risk of queue loss in case of a job failure.
 
 **NB2:** Asynchronicity is not available on Windows at the moment. File an issue if you need it.
+
+## UNIX user permissions
+
+If one of your cron jobs writes data to disk, you may face some permission issues if both the cron user and
+the web server user try to write data to the same files.
+
+For example, let's imagine that you cron job is executed as `root` and renders a HTML template to embed it in
+a reporting email. Then the next time the web server will try to recompile this template, it will not be allowed
+to modify the temporary file located in `$f3->TEMP` and the web user will face a 500 error.
+
+See [this issue](https://github.com/xfra35/f3-cron/issues/4) for another example.
+
+Here are two different ways to fix that kind of issue:
+
+* make sure your cron jobs are executed by the web server user, with `crontab -u www mycrontab` (where `www` is the name of the web server user)
+* make sure the web server user and the cron user belong to the same UNIX group and give group write access to the writeable folders
+(e.g `chmod -R g+w /srv/www/tmp`)
 
 ## API
 
