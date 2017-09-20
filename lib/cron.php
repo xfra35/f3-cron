@@ -6,7 +6,7 @@ class Cron extends \Prefab {
     const
         E_Undefined='Undefined property: %s::$%s',
         E_Invalid='"%s" is not a valid name: it should only contain alphanumeric characters',
-        E_NotFound='Job %s doesn\' exist',
+        E_NotFound='Job %s doesn\'t exist',
         E_Callable='Job %s cannot be called';
     //@}
 
