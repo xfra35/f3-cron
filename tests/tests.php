@@ -136,7 +136,7 @@ class Tests {
             $loop=array(0.1,4);//loop (step=0.1s / max=4s)
             while(microtime(TRUE)-$start<$loop[1]) {
                 usleep($loop[0]*1000000);
-                if (file_exists($testfile) && preg_match('/([ABCD]){4}/',file_get_contents($testfile),$m) && array_unique($m)===$m) {
+                if (file_exists($testfile) && in_array(file_get_contents($testfile),['ACDB','CADB','CDAB'])) {
                     $async_ok=TRUE;
                     break;
                 }
