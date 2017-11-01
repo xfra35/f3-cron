@@ -221,10 +221,8 @@ If you want tasks to be run asynchronously, you'll need:
 * the [script path](#script-path) to be configured correctly
 * the [PHP CLI binary](#php-binary-path) to be executable and in the path of your hosting user
 
-**NB1:** The plugin will detect automatically if jobs can be run asynchronously.
+**NB:** The plugin will detect automatically if jobs can be run asynchronously.
 If not, jobs will be executed synchronously, which may take longer and add a risk of queue loss in case of a job failure.
-
-**NB2:** Asynchronicity is not available on Windows at the moment. File an issue if you need it.
 
 ## UNIX user permissions
 
@@ -353,8 +351,3 @@ $cron->execute('Job2',FALSE); // executes Job2 synchronously
 $cron->run(strtotime('yesterday midnight'));
 // run asynchronously all jobs due yesterday at midnight
 ```
-
-## Potential improvements
-
-* Enable asynchronous execution on Windows.
-
