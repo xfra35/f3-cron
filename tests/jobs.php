@@ -28,7 +28,7 @@ class Jobs {
 
     function test1($f3) {
         $this->write('A');
-        usleep(50000);
+        usleep(500000);
         $this->write('B');
     }
 
