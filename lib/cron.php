@@ -116,7 +116,7 @@ class Cron extends \Prefab {
             // Failing to do so will cause PHP to hang until the execution of the program ends.
             $dir=dirname($this->script);
             $file=basename($this->script);
-            if (!preg_match($this->windows?'/^[A-Z]:\\/i':'/^\//',$dir))
+            if (!preg_match($this->windows?'/^[A-Z]:\\\\/i':'/^\//',$dir))
                 $dir=getcwd().'/'.$dir;
             if ($this->windows) {
                 pclose(popen(sprintf('start "cron" "%s" "%s\\%s" "/cron/%s"',$this->binary,$dir,$file,$job),'r'));
