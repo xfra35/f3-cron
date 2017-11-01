@@ -18,7 +18,6 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
 * [Asynchronicity](#asynchronicity)
 * [UNIX user permissions](#unix-user-permissions)
 * [API](#api)
-* [Potential improvements](#potential-improvements)
 
 ## Installation
 
