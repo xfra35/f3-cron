@@ -8,6 +8,6 @@
 		"classmap": ["lib/"]
 	},
 	"require": {
-		"bcosca/fatfree-core": "3.*"
+		"bcosca/fatfree-core": ">=3.5"
 	}
 }
