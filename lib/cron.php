@@ -121,7 +121,7 @@ class Cron extends \Prefab {
             if ($this->windows) {
                 pclose(popen(sprintf('start /b "cron" "%s" "%s\\%s" "/cron/%s"',$this->binary,$dir,$file,$job),'r'));
             } else {
-                exec(sprintf('cd "%s" & %s %s /cron/%s >/dev/null 2>/dev/null &',$dir,$this->binary,$file,$job));
+                exec(sprintf('cd "%s" && %s %s /cron/%s >/dev/null 2>/dev/null &',$dir,$this->binary,$file,$job));
             }
             return FALSE;
         }
