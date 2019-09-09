@@ -16,7 +16,9 @@ This plugin for [Fat-Free Framework](http://github.com/bcosca/fatfree) helps you
     * [PHP binary path](#php-binary-path)
 * [Ini configuration](#ini-configuration)
 * [Asynchronicity](#asynchronicity)
-* [UNIX user permissions](#unix-user-permissions)
+* [Common pitfalls](#common-pitfalls)
+    * [UNIX user permissions](#unix-user-permissions)
+    * [Overlapping jobs](#overlapping-jobs)
 * [API](#api)
 
 ## Installation
@@ -192,7 +194,7 @@ Configuration is possible from within an .ini file, using the `CRON` variable. E
 [CRON]
 log = TRUE
 web = FALSE
-script = cron.php
+script = /path/to/index.php
 
 [CRON.presets]
 lunch = 0 12 * * *
@@ -215,7 +217,11 @@ $f3->run();
 
 ## Asynchronicity
 
-If you want tasks to be run asynchronously, you'll need:
+As configured in [step 1](#step-1), the cron plugin is instantianted every minute. Each instance is run independantly from each other.
+
+Within an instance, there may be several due jobs, which can be run synchronously or asynchronously.
+
+If you want due jobs to be run asynchronously within an instance, you'll need:
 * `exec()` to be enabled on your hosting
 * the [script path](#script-path) to be configured correctly
 * the [PHP CLI binary](#php-binary-path) to be executable and in the path of your hosting user
@@ -223,7 +229,9 @@ If you want tasks to be run asynchronously, you'll need:
 **NB:** The plugin will detect automatically if jobs can be run asynchronously.
 If not, jobs will be executed synchronously, which may take longer and add a risk of queue loss in case of a job failure.
 
-## UNIX user permissions
+## Common pitfalls
+
+### UNIX user permissions
 
 If one of your cron jobs writes data to disk, you may face some permission issues if both the cron user and
 the web server user try to write data to the same files.
@@ -239,6 +247,40 @@ Here are two different ways to fix that kind of issue:
 * make sure your cron jobs are executed by the web server user, with `crontab -u www mycrontab` (where `www` is the name of the web server user)
 * make sure the web server user and the cron user belong to the same UNIX group and give group write access to the writeable folders
 (e.g `chmod -R g+w /srv/www/tmp`)
+
+### Overlapping jobs
+
+If a job runs longer than what it was designed for, one instance may overlap another (e.g: a job running every 5 min that completes in 6 min).
+
+Depending on the type of job, this situation may be undesirable (risk of data corruption).
+
+If that's the case, you should prevent jobs from overlapping by using one of the following solutions:
+
+#### Setting a max execution time
+
+The [max execution time](http://php.net/manual/en/info.configuration.php#ini.max-execution-time) in CLI mode defaults to 0.
+That means scripts can run forever.
+
+Setting that parameter to a value slightly smaller than the job frequency will prevent jobs from overlapping.
+
+**NB:** don't forget to send a report on job failure, otherwise you could end up with all jobs failing silently.
+
+#### Using a resource locking mechanism
+
+Inside your application code, you could keep track of running jobs using a lock file or a database flag, so that two cron instances
+can't execute the same job at the same time.
+
+**NB:** don't forget to handle stale locks.
+
+Alternatively, you can use the `flock` binary, which provides automatic lock management. Beware that this solution is slightly
+different as it prevents two cron instances (not jobs) from executing at the same time: if "job1" is still running, "job1" *and* "job2"
+will be skipped. This solution is easy to implement though: just replace the crontab defined in [step 1](#step-1) with the following one:
+
+```cron
+* * * * * cd /path/to/app; flock -n cron.lock php index.php /cron
+```
+
+**NB:** the `cron.lock` can be located anywhere, provided the `cron` has write access to it.
 
 ## API
 
