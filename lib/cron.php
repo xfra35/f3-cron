@@ -31,17 +31,17 @@ class Cron extends \Prefab {
     protected $binary;
 
     /** @var array */
-    protected $jobs=array();
+    protected $jobs=[];
 
     /** @var array */
-    protected $presets=array(
+    protected $presets=[
         'yearly'=>'0 0 1 1 *',
         'annually'=>'0 0 1 1 *',
         'monthly'=>'0 0 1 * *',
         'weekly'=>'0 0 * * 0',
         'daily'=>'0 0 * * *',
         'hourly'=>'0 * * * *',
-    );
+    ];
 
     /** @var bool */
     private $windows;
@@ -69,7 +69,7 @@ class Cron extends \Prefab {
     function set($job,$handler,$expr) {
         if (!preg_match('/^[\w\-]+$/',$job))
             user_error(sprintf(self::E_Invalid,$job),E_USER_ERROR);
-        $this->jobs[$job]=array($handler,$expr);
+        $this->jobs[$job]=[$handler,$expr];
     }
 
     /**
@@ -126,7 +126,7 @@ class Cron extends \Prefab {
             return FALSE;
         }
         $start=microtime(TRUE);
-        call_user_func_array($func,array($f3));
+        call_user_func_array($func,[$f3]);
         if ($this->log) {
             $log=new Log('cron.log');
             $log->write(sprintf(self::L_Execution,$job,microtime(TRUE)-$start));
@@ -143,7 +143,7 @@ class Cron extends \Prefab {
     function run($time=NULL,$async=TRUE) {
         if (!isset($time))
             $time=time();
-        $exec=array();
+        $exec=[];
         foreach(array_keys($this->jobs) as $job)
             if ($this->isDue($job,$time))
                 $exec[$job]=$this->execute($job,$async);
@@ -159,7 +159,7 @@ class Cron extends \Prefab {
         if (PHP_SAPI!='cli' && !$this->web)
             $f3->error(404);
         $exec=isset($params['job'])?
-            array($params['job']=>$this->execute($params['job'],FALSE)):
+            [$params['job']=>$this->execute($params['job'],FALSE)]:
             $this->run();
         if (!$this->silent) {
             if (PHP_SAPI!='cli')
@@ -177,13 +177,13 @@ class Cron extends \Prefab {
      * @return array
      */
     function parseTimestamp($time) {
-        return array(
+        return [
             (int)date('i',$time),//minute
             (int)date('H',$time),//hour
             (int)date('d',$time),//day of month
             (int)date('m',$time),//month
             (int)date('w',$time),//day of week
-        );
+        ];
     }
 
     /**
@@ -192,24 +192,24 @@ class Cron extends \Prefab {
      * @return array|FALSE
      */
     function parseExpr($expr) {
-        $parts=array();
+        $parts=[];
         if (preg_match('/^@(\w+)$/',$expr,$m)) {
             if (!isset($this->presets[$m[1]]))
                 return FALSE;
             $expr=$this->presets[$m[1]];
         }
         $expr=preg_split('/\s+/',$expr,-1,PREG_SPLIT_NO_EMPTY);
-        $ranges=array(
+        $ranges=[
             0=>59,//minute
             1=>23,//hour
             2=>31,//day of month
             3=>12,//month
             4=>6,//day of week
-        );
+        ];
         foreach($ranges as $i=>$max)
             if (isset($expr[$i]) && preg_match_all('/(?<=,|^)\h*(?:(\d+)(?:-(\d+))?|(\*))(?:\/(\d+))?\h*(?=,|$)/',
                     $expr[$i],$matches,PREG_SET_ORDER)) {
-                $parts[$i]=array();
+                $parts[$i]=[];
                 foreach($matches as $m) {
                     if (!$range=@range(@$m[3]?0:$m[1],@$m[3]?$max:(@$m[2]?:$m[1]),@$m[4]?:1))
                         return FALSE;//step exceeds specified range
@@ -222,7 +222,7 @@ class Cron extends \Prefab {
 
     //! Read-only public properties
     function __get($name) {
-        if (in_array($name,array('binary','jobs','presets')))
+        if (in_array($name,['binary','jobs','presets']))
             return $this->$name;
         if ($name=='clipath') // alias for script [deprecated]
             return $this->script;
@@ -233,7 +233,7 @@ class Cron extends \Prefab {
     function __construct() {
         $f3=\Base::instance();
         $config=(array)$f3->get('CRON');
-        foreach(array('log','web','script','silent') as $k)
+        foreach(['log','web','script','silent'] as $k)
             if (isset($config[$k])) {
                 settype($config[$k],gettype($this->$k));
                 $this->$k=$config[$k];
@@ -249,11 +249,11 @@ class Cron extends \Prefab {
             foreach($config['presets'] as $name=>$expr)
                 $this->preset($name,is_array($expr)?implode(',',$expr):$expr);
         if (!isset($this->binary))
-            foreach(array('php','php-cli') as $path) // try to guess the binary name
+            foreach(['php','php-cli'] as $path) // try to guess the binary name
                 if ($this->binary($path))
                     break;
         $this->windows=(bool)preg_match('/^win/i',PHP_OS);
-        $f3->route(array('GET /cron','GET /cron/@job'),array($this,'route'));
+        $f3->route(['GET /cron','GET /cron/@job'],[$this,'route']);
     }
 
 }
