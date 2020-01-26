@@ -186,6 +186,16 @@ Example:
 $cron->binary('/home/myphp-cli');
 ```
 
+The PHP binary validity is checked every time the class is instanciated, which can lead to a performance hit (see https://github.com/xfra35/f3-cron/issues/9).
+
+You can skip this check by forcing the path, using the 2nd parameter:
+
+```php
+$cron->binary('/home/myphp-cli',TRUE); // set PHP binary path, whether it's valid or not
+```
+
+In that case, you are responsible for providing the correct path.
+
 ## Ini configuration
 
 Configuration is possible from within an .ini file, using the `CRON` variable. E.g:
@@ -195,6 +205,7 @@ Configuration is possible from within an .ini file, using the `CRON` variable. E
 log = TRUE
 web = FALSE
 script = /path/to/index.php
+binary = /path/to/php
 
 [CRON.presets]
 lunch = 0 12 * * *
@@ -203,6 +214,13 @@ lunch = 0 12 * * *
 Job1 = App->job1, * * * * *
 Job2 = App->job2, @lunch
 Job3 = App->job3, @hourly
+```
+
+If you need to force the PHP binary path, just pass TRUE as a 2nd parameter:
+
+```ini
+[CRON]
+binary = /path/to/php, TRUE
 ```
 
 **IMPORTANT:** Don't forget to instantiate the class before running your app:
@@ -327,12 +345,15 @@ $cron->script=__DIR__.'/cron.php';//absolute path
 echo $cron->binary;// php
 ```
 
-### binary( $path )
+### binary( $path, $force=FALSE )
 
-**Set PHP CLI binary path**
+**Set PHP CLI binary path if it's valid (which means if it can be executed and is CLI)**
+
+If `$force=TRUE`, the path is forced without validation check. This option can be used for performance optimization (see https://github.com/xfra35/f3-cron/issues/9).
 
 ```php
-$cron->binary('/home/myphp-cli');
+$cron->binary('/home/myphp-cli'); // set PHP binary path, only if it's valid
+$cron->binary('/home/myphp-cli',TRUE); // set PHP binary path, whether it's valid or not
 ```
 
 ### silent

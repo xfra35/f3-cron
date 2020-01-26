@@ -47,11 +47,15 @@ class Cron extends \Prefab {
     private $windows;
 
     /**
-     * Set binary path after checking that it can be executed and is CLI
+     * Set PHP binary path if it's valid (which means if it can be executed and is CLI)
+     * If $force=TRUE, the path is forced without validation check.
      * @param string $path
+     * @param bool $force
      * @return string
      */
-    function binary($path) {
+    function binary($path,$force=FALSE) {
+        if ($force)
+            return $this->binary=$path;
         if (function_exists('exec')) {
             exec($path.' -v 2>&1',$out,$ret);
             if ($ret==0 && preg_match('/cli/',@$out[0],$out))
@@ -239,7 +243,11 @@ class Cron extends \Prefab {
                 $this->$k=$config[$k];
             }
         if (isset($config['binary']))
-            $this->binary($config['binary']);
+            call_user_func_array([$this,'binary'],is_array($config['binary'])?$config['binary']:[$config['binary']]);
+        if (!isset($this->binary))
+            foreach(['php','php-cli'] as $path) // try to guess the binary name
+                if ($this->binary($path))
+                    break;
         if (isset($config['jobs']))
             foreach($config['jobs'] as $job=>$arr) {
                 $handler=array_shift($arr);
@@ -248,10 +256,6 @@ class Cron extends \Prefab {
         if (isset($config['presets']))
             foreach($config['presets'] as $name=>$expr)
                 $this->preset($name,is_array($expr)?implode(',',$expr):$expr);
-        if (!isset($this->binary))
-            foreach(['php','php-cli'] as $path) // try to guess the binary name
-                if ($this->binary($path))
-                    break;
         $this->windows=(bool)preg_match('/^win/i',PHP_OS);
         $f3->route(['GET /cron','GET /cron/@job'],[$this,'route']);
     }
