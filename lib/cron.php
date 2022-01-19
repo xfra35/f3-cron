@@ -132,7 +132,7 @@ class Cron extends \Prefab {
         $start=microtime(TRUE);
         call_user_func_array($func,[$f3]);
         if ($this->log) {
-            $log=new Log('cron.log');
+            $log=new Log('cron_'.date('Y_m_d').'.log');
             $log->write(sprintf(self::L_Execution,$job,microtime(TRUE)-$start));
         }
         return TRUE;
