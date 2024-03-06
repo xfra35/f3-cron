@@ -257,7 +257,7 @@ class Cron extends \Prefab {
             foreach($config['presets'] as $name=>$expr)
                 $this->preset($name,is_array($expr)?implode(',',$expr):$expr);
         $this->windows=(bool)preg_match('/^win/i',PHP_OS);
-        $f3->route(['GET /cron','GET /cron/@job'],[$this,'route']);
+        $f3->route(['GET|HEAD /cron','GET|HEAD /cron/@job'],[$this,'route']);
     }
 
 }
