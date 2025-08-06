@@ -8,6 +8,7 @@
 		"classmap": ["lib/"]
 	},
 	"require": {
+		"php": ">=7.2",
 		"bcosca/fatfree-core": "~3.5"
 	}
 }
