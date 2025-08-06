@@ -7,12 +7,12 @@ class Tests {
         Registry::clear('Cron');
         //plugin config
         $f3->config('tests/jobs.ini');
-        $f3->mset(array(
+        $f3->mset([
             'log'=>FALSE,
             'cli'=>TRUE,
             'web'=>FALSE,
             'script'=>'index.php',
-        ),'CRON.');
+        ],'CRON.');
         $cron=Cron::instance();
         $test->expect(
             !$cron->log && !$cron->web && count($cron->jobs)==3 && $cron->script=='index.php',
@@ -29,7 +29,7 @@ class Tests {
         //binary auto-detection
         $binary=NULL;
         if (function_exists('exec'))
-            foreach(array('php','php-cli') as $bin) {
+            foreach(['php','php-cli'] as $bin) {
                 exec($bin.' -v 2>&1',$out,$ret);
                 if ($ret==0) {
                     $binary=$bin;
@@ -47,15 +47,15 @@ class Tests {
         );
         //expression parsing
         $test->expect(
-            $cron->parseExpr('1 2 3,9 4 5')===array(array(1),array(2),array(3,9),array(4),array(5)),
+            $cron->parseExpr('1 2 3,9 4 5')===[[1], [2], [3,9], [4], [5]],
             'parseExpr(): single values'
         );
         $test->expect(
-            $cron->parseExpr('1-3 2-5 3-2,1 4 *')===array(array(1,2,3),array(2,3,4,5),array(3,2,1),array(4),range(0,6)),
+            $cron->parseExpr('1-3 2-5 3-2,1 4 *')===[[1,2,3], [2,3,4,5], [3,2,1], [4],range(0,6)],
             'parseExpr(): ranges and wildcards'
         );
         $test->expect(
-            $cron->parseExpr('0,1-6/2,10 2 0-10/3 4 */3')===array(array(0,1,3,5,10),array(2),array(0,3,6,9),array(4),array(0,3,6)),
+            $cron->parseExpr('0,1-6/2,10 2 0-10/3 4 */3')===[[0,1,3,5,10], [2], [0,3,6,9], [4], [0,3,6]],
             'parseExpr(): step values on ranges and wildcards'
         );
         $test->expect(
@@ -78,7 +78,7 @@ class Tests {
         //timestamp parsing
         $time=mktime(1,2,3,4,5,2015);// 2015-04-05 01:02:03 (Saturday)
         $test->expect(
-            $cron->parseTimestamp($time)==array(2,1,5,4,0),
+            $cron->parseTimestamp($time)==[2,1,5,4,0],
             'parseTimestamp()'
         );
         //due check
@@ -133,7 +133,7 @@ class Tests {
             $async_ok=FALSE;
             //wait for async processes to complete
             $start=microtime(TRUE);
-            $loop=array(0.1,4);//loop (step=0.1s / max=4s)
+            $loop=[0.1,4];//loop (step=0.1s / max=4s)
             while(microtime(TRUE)-$start<$loop[1]) {
                 usleep($loop[0]*1000000);
                 if (file_exists($testfile) && in_array(file_get_contents($testfile),['ACDB','CADB','CDAB'])) {
