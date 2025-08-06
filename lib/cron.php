@@ -211,13 +211,17 @@ class Cron extends \Prefab {
             4=>6,//day of week
         ];
         foreach($ranges as $i=>$max)
-            if (isset($expr[$i]) && preg_match_all('/(?<=,|^)\h*(?:(\d+)(?:-(\d+))?|(\*))(?:\/(\d+))?\h*(?=,|$)/',
-                    $expr[$i],$matches,PREG_SET_ORDER)) {
+            if (isset($expr[$i]) && preg_match_all('/(?<=,|^)\h*(?:(\d+)(?:-(\d+))?|(\*))(?:\/(\d+))?\h*(?=,|$)/',/* groups 1 & 2 capture a range, group 3 captures a wildcard, group 4 captures a step */
+                    $expr[$i],$matches,PREG_SET_ORDER|PREG_UNMATCHED_AS_NULL)) {
                 $parts[$i]=[];
                 foreach($matches as $m) {
-                    if (!$range=@range(@$m[3]?0:$m[1],@$m[3]?$max:(@$m[2]?:$m[1]),@$m[4]?:1))
+                    $start=$m[3]?0:(int)$m[1];
+                    $end=$m[3]?$max:(int)($m[2]??$m[1]);
+                    $step=(int)($m[4]??1);
+                    $range=abs($end-$start);
+                    if ($range>0 && $step>$range)
                         return FALSE;//step exceeds specified range
-                    $parts[$i]=array_merge($parts[$i],$range);
+                    $parts[$i]=array_merge($parts[$i],range($start,$end,$step));
                 }
             } else
                 return FALSE;
